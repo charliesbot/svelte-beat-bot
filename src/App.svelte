@@ -8,7 +8,6 @@
   let currentSize = 200;
 
   $: if (wrapper) {
-    console.log("papita");
     let bscroll: BetterScroll = new BetterScroll(wrapper, {
       freeScroll: true,
       probeType: 3,

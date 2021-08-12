@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { SongType } from "../types/types";
+
   export let node: HTMLDivElement;
   export let size: number;
   export let song: SongType;
