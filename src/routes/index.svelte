@@ -1,104 +1,21 @@
 <script lang="ts">
-  import BetterScroll from "@better-scroll/core";
-  import ScrollBar from "@better-scroll/scroll-bar";
-  import Song from "$lib/components/Song.svelte";
-  import { distanceBetweenPoints, getCenter } from "$lib/utils/layout";
-  import { songs as music } from "../song";
+  import TopTracks from "./TopTracks.svelte";
 
-  let wrapper: HTMLElement;
-  let maxElementsPerRow = 14;
-  let currentSize = 200;
-  console.log("test ", music.length);
+  import { initClient } from "@urql/svelte";
 
-  $: if (wrapper) {
-    const songs: HTMLElement[] = Array.from(wrapper.querySelectorAll(".song"));
-
-    BetterScroll.use(ScrollBar);
-
-    let bscroll: BetterScroll = new BetterScroll(wrapper, {
-      freeScroll: true,
-      probeType: 3,
-      scrollbar: false,
-      scrollX: true,
-      scrollY: true,
-    });
-
-    console.log(songs[Math.floor(songs.length / 2)]);
-    bscroll.scroller.scrollToElement(
-      songs[Math.floor(songs.length / 2)],
-      1000,
-      currentSize / 2,
-      currentSize / 2
-    );
-
-    bscroll.on("scroll", () => {
-      const distances = songs.map((song) => {
-        const rect = song.getBoundingClientRect();
-        const coords = {
-          x: rect.left + rect.width / 2,
-          y: rect.top + rect.height / 2,
-        };
-        const origin = getCenter(document.body);
-        const calculatedDistance = distanceBetweenPoints(origin, coords);
-        const delta = 2 - calculatedDistance / (currentSize * 1.65);
-        const limitedDelta = Math.max(delta, 1);
-        const zIndex = Math.ceil(limitedDelta * 100);
-        return { delta: limitedDelta, zIndex };
-      });
-
-      songs.forEach((song, index) => {
-        const { delta, zIndex } = distances[index];
-        song.style.transform = `scale3d(${delta}, ${delta}, ${delta})`;
-        delta > 1.5 ? song.classList.add("show-overlay") : song.classList.remove("show-overlay");
-        song.style.zIndex = zIndex.toString();
-      });
-    });
-  }
+  initClient({
+    url: "http://localhost:3000/graphql",
+    fetchOptions: () => {
+      const token =
+        "BQB8z0ydw1fMFEWzpnjxLbpfj_TdpOnL1q1deSo5tvcOlqvi4vFesQduHHd7i5o2qJGhDQFn4Te60BhY-LFtNQ2oYRZUC2sQd2DXv7ngjWfOxUainoSTayloX_RaAtK1wely5N0c6Qh-PKCBABob-J9tUz_59FNc-wVGs6GCbte98YLvVgwc";
+      return {
+        headers: { authorization: token ? `Bearer ${token}` : "" },
+      };
+    },
+  });
 </script>
 
-<main bind:this={wrapper}>
-  <aside
-    class="content"
-    style="
-      --width:{currentSize * maxElementsPerRow}px;
-      --height:{Math.ceil(music.length / maxElementsPerRow) * currentSize};
-      --maxElementsPerRow:{maxElementsPerRow}
-      "
-  >
-    {#each music as song}
-      <Song size={currentSize} {song} />
-    {/each}
-  </aside>
-</main>
+<TopTracks />
 
 <style lang="scss">
-  :global::body {
-    height: 100vh;
-    overflow: hidden;
-  }
-
-  main {
-    width: 3.125rem;
-    height: 3.125rem;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    margin-left: -1.5625rem;
-    margin-top: -1.5625rem;
-  }
-
-  aside {
-    display: grid;
-    grid-template-columns: repeat(var(--maxElementsPerRow), 200px);
-    grid-template-rows: repeat(mar(--maxElementsPerRow), maxEle 200px);
-    position: relative;
-    color: white;
-    width: var(--width);
-    height: var(--height);
-    transform-style: preserve-3d;
-    cursor: grab;
-    &:active {
-      cursor: grabbing;
-    }
-  }
 </style>
