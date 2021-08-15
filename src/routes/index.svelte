@@ -1,59 +1,104 @@
-<script context="module" lang="ts">
-	export const prerender = true;
-</script>
-
 <script lang="ts">
-	import Counter from '$lib/Counter.svelte';
+  import BetterScroll from "@better-scroll/core";
+  import ScrollBar from "@better-scroll/scroll-bar";
+  import Song from "$lib/components/Song.svelte";
+  import { distanceBetweenPoints, getCenter } from "$lib/utils/layout";
+  import { songs as music } from "../song";
+
+  let wrapper: HTMLElement;
+  let maxElementsPerRow = 14;
+  let currentSize = 200;
+  console.log("test ", music.length);
+
+  $: if (wrapper) {
+    const songs: HTMLElement[] = Array.from(wrapper.querySelectorAll(".song"));
+
+    BetterScroll.use(ScrollBar);
+
+    let bscroll: BetterScroll = new BetterScroll(wrapper, {
+      freeScroll: true,
+      probeType: 3,
+      scrollbar: false,
+      scrollX: true,
+      scrollY: true,
+    });
+
+    console.log(songs[Math.floor(songs.length / 2)]);
+    bscroll.scroller.scrollToElement(
+      songs[Math.floor(songs.length / 2)],
+      1000,
+      currentSize / 2,
+      currentSize / 2
+    );
+
+    bscroll.on("scroll", () => {
+      const distances = songs.map((song) => {
+        const rect = song.getBoundingClientRect();
+        const coords = {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2,
+        };
+        const origin = getCenter(document.body);
+        const calculatedDistance = distanceBetweenPoints(origin, coords);
+        const delta = 2 - calculatedDistance / (currentSize * 1.65);
+        const limitedDelta = Math.max(delta, 1);
+        const zIndex = Math.ceil(limitedDelta * 100);
+        return { delta: limitedDelta, zIndex };
+      });
+
+      songs.forEach((song, index) => {
+        const { delta, zIndex } = distances[index];
+        song.style.transform = `scale3d(${delta}, ${delta}, ${delta})`;
+        delta > 1.5 ? song.classList.add("show-overlay") : song.classList.remove("show-overlay");
+        song.style.zIndex = zIndex.toString();
+      });
+    });
+  }
 </script>
 
-<svelte:head>
-	<title>Home</title>
-</svelte:head>
+<main bind:this={wrapper}>
+  <aside
+    class="content"
+    style="
+      --width:{currentSize * maxElementsPerRow}px;
+      --height:{Math.ceil(music.length / maxElementsPerRow) * currentSize};
+      --maxElementsPerRow:{maxElementsPerRow}
+      "
+  >
+    {#each music as song}
+      <Song size={currentSize} {song} />
+    {/each}
+  </aside>
+</main>
 
-<section>
-	<h1>
-		<div class="welcome">
-			<picture>
-				<source srcset="svelte-welcome.webp" type="image/webp" />
-				<img src="svelte-welcome.png" alt="Welcome" />
-			</picture>
-		</div>
+<style lang="scss">
+  :global::body {
+    height: 100vh;
+    overflow: hidden;
+  }
 
-		to your new<br />SvelteKit app
-	</h1>
+  main {
+    width: 3.125rem;
+    height: 3.125rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -1.5625rem;
+    margin-top: -1.5625rem;
+  }
 
-	<h2>
-		try editing <strong>src/routes/index.svelte</strong>
-	</h2>
-
-	<Counter />
-</section>
-
-<style>
-	section {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		flex: 1;
-	}
-
-	h1 {
-		width: 100%;
-	}
-
-	.welcome {
-		position: relative;
-		width: 100%;
-		height: 0;
-		padding: 0 0 calc(100% * 495 / 2048) 0;
-	}
-
-	.welcome img {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		top: 0;
-		display: block;
-	}
+  aside {
+    display: grid;
+    grid-template-columns: repeat(var(--maxElementsPerRow), 200px);
+    grid-template-rows: repeat(mar(--maxElementsPerRow), maxEle 200px);
+    position: relative;
+    color: white;
+    width: var(--width);
+    height: var(--height);
+    transform-style: preserve-3d;
+    cursor: grab;
+    &:active {
+      cursor: grabbing;
+    }
+  }
 </style>
