@@ -11,7 +11,7 @@ export type AlbumType = {
 
 @ObjectType()
 export class AlbumResolver {
-  @Field((type) => ID)
+  @Field(() => ID)
   id: string;
 
   @Field(() => String)
