@@ -1,8 +1,10 @@
 <script lang="ts">
   import BetterScroll from "@better-scroll/core";
-  import { operationStore, query } from "@urql/svelte";
+  import { useQuery } from "@sveltestack/svelte-query";
   import Song from "$lib/components/Song.svelte";
   import { getCenter } from "$lib/utils/layout";
+  import { graphqlClient } from "./graphqlClient";
+  import { GET_FAKE_TRACKS } from "./queries";
 
   let wrapper: HTMLElement;
   let maxElementsPerRow = 13;
@@ -13,60 +15,9 @@
   };
   let scrollPoints: any;
 
-  const GET_TOP_TRACKS = operationStore(
-    `
-    query GetTopTracks($entity: String!, $timeRange: String!, $limit: Int!) {
-      topTracks(entity: $entity, timeRange: $timeRange, limit: $limit) {
-        id
-        name
-        artists {
-          id
-          name
-        }
-        album {
-          id
-          name
-          images {
-            width
-            height
-            url
-          }
-        }
-      }
-    }
-  `,
-    {
-      entity: "tracks",
-      timeRange: "long_term",
-      limit: 49,
-    }
-  );
-
-  const GET_FAKE_TRACKS = operationStore(
-    `
-    query GetTopTracksFake {
-      topTracksFake {
-        id
-        name
-        artists {
-          id
-          name
-        }
-        album {
-          id
-          name
-          images {
-            width
-            height
-            url
-          }
-        }
-      }
-    }
-  `
-  );
-
-  const queryResult = query(GET_FAKE_TRACKS);
+  const queryResult = useQuery("repoData", async () => {
+    return graphqlClient.request(GET_FAKE_TRACKS);
+  });
 
   $: if (wrapper) {
     const songs: HTMLElement[] = Array.from(wrapper.querySelectorAll(".song"));
@@ -90,10 +41,10 @@
   }
 </script>
 
-{#if $queryResult.fetching}
+{#if $queryResult.isLoading}
   <span>Loading...</span>
 {:else if $queryResult.error}
-  <span>Error: {$queryResult.error.message}</span>
+  <span>An error has occurred: {$queryResult.error.message}</span>
 {:else}
   <main bind:this={wrapper}>
     <aside

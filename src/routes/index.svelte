@@ -1,20 +1,13 @@
 <script lang="ts">
+  import { QueryClientProvider, QueryClient } from "@sveltestack/svelte-query";
   import TopTracks from "./TopTracks.svelte";
 
-  import { initClient } from "@urql/svelte";
-
-  initClient({
-    url: "http://localhost:3000/graphql",
-    fetchOptions: () => {
-      const token = "";
-      return {
-        headers: { authorization: token ? `Bearer ${token}` : "" },
-      };
-    },
-  });
+  const queryClient = new QueryClient();
 </script>
 
-<TopTracks />
+<QueryClientProvider client={queryClient}>
+  <TopTracks />
+</QueryClientProvider>
 
 <style lang="scss">
 </style>
