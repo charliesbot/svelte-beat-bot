@@ -3,8 +3,8 @@ import { fakeSongs } from "../song";
 
 import type { SpotifySDK, Entity, TimeRange } from "$lib/SpotifySDK";
 
-import { Song } from "./Song";
-import { User } from "./User";
+import { SongResolver } from "./SongResolver";
+import { UserResolver } from "./UserResolver";
 
 type Context = {
   client: ReturnType<typeof SpotifySDK>;
@@ -17,7 +17,7 @@ export class Resolvers {
     return "world";
   }
 
-  @Query(() => [Song])
+  @Query(() => [SongResolver])
   async topTracks(
     @Arg("entity", () => String) entity: Entity,
     @Arg("timeRange", () => String) timeRange: TimeRange,
@@ -28,18 +28,18 @@ export class Resolvers {
     return topTracks.items;
   }
 
-  @Query(() => [Song])
+  @Query(() => [SongResolver])
   async topTracksFake() {
     return fakeSongs;
   }
 
-  @Query(() => [Song])
+  @Query(() => [SongResolver])
   async topTracksFromAllTimeRanges(@Ctx() ctx: Context) {
     const topTracks = await ctx.client.getTopTracksFromAllTimeRanges();
     return topTracks;
   }
 
-  @Query(() => User)
+  @Query(() => UserResolver)
   async user(@Ctx() ctx: Context) {
     const user = await ctx.client.getUser();
     return user;

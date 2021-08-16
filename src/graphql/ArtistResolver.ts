@@ -9,8 +9,8 @@ export type ArtistType = {
 };
 
 @ObjectType()
-export class Artist {
-  @Field((type) => ID)
+export class ArtistResolver {
+  @Field(() => ID)
   id: string;
 
   @Field(() => String)

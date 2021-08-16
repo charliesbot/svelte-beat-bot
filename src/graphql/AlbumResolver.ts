@@ -1,6 +1,6 @@
 import { ObjectType, Field, ID } from "type-graphql";
-import { Image } from "./Image";
-import type { ImageType } from "./Image";
+import { ImageResolver } from "./ImageResolver";
+import type { ImageType } from "./ImageResolver";
 
 export type AlbumType = {
   id: string;
@@ -10,7 +10,7 @@ export type AlbumType = {
 };
 
 @ObjectType()
-export class Album {
+export class AlbumResolver {
   @Field((type) => ID)
   id: string;
 
@@ -20,6 +20,6 @@ export class Album {
   @Field(() => String)
   uri: string;
 
-  @Field(() => [Image])
+  @Field(() => [ImageResolver])
   images: ImageType[];
 }

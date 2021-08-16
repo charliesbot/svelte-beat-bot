@@ -14,7 +14,7 @@ const config = {
     vite: {
       optimizeDeps: {
         include: ["broadcast-channel"],
-        exclude: ["@urql/svelte", "graphql-request"],
+        exclude: ["@urql/svelte"],
       },
     },
   },

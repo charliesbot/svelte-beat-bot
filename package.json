@@ -39,9 +39,6 @@
     "cookie": "^0.4.1",
     "graphql": "^15.5.1",
     "graphql-helix": "^1.7.0",
-    "graphql-request": "^3.5.0",
-    "houdini": "^0.10.4",
-    "houdini-preprocess": "^0.10.4",
     "reflect-metadata": "^0.1.13",
     "type-graphql": "^1.1.1"
   }

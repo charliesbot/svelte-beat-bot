@@ -11,7 +11,7 @@ import { ObjectType, Field, ID } from "type-graphql";
 // }
 
 @ObjectType()
-class User {
+export class UserResolver {
   @Field((type) => ID)
   id: string;
 
@@ -25,5 +25,3 @@ class User {
     return this.external_urls;
   }
 }
-
-export { User };

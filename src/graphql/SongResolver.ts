@@ -1,8 +1,8 @@
 import { ObjectType, Field, ID } from "type-graphql";
-import { Album } from "./Album";
-import type { AlbumType } from "./Album";
-import { Artist } from "./Artist";
-import type { ArtistType } from "./Artist";
+import { AlbumResolver } from "./AlbumResolver";
+import type { AlbumType } from "./AlbumResolver";
+import { ArtistResolver } from "./ArtistResolver";
+import type { ArtistType } from "./ArtistResolver";
 
 export type SongType = {
   id: string;
@@ -14,8 +14,8 @@ export type SongType = {
 };
 
 @ObjectType()
-class Song {
-  @Field((type) => ID)
+export class SongResolver {
+  @Field(() => ID)
   id: string;
 
   @Field(() => String)
@@ -24,10 +24,10 @@ class Song {
   @Field(() => String)
   uri?: string;
 
-  @Field(() => Album)
+  @Field(() => AlbumResolver)
   album?: AlbumType;
 
-  @Field(() => [Artist])
+  @Field(() => [ArtistResolver])
   artists?: ArtistType[];
 
   @Field(() => String)
@@ -35,5 +35,3 @@ class Song {
     return this.preview_url;
   }
 }
-
-export { Song };

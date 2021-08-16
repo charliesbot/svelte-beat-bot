@@ -7,7 +7,7 @@ export type ImageType = {
 };
 
 @ObjectType()
-export class Image {
+export class ImageResolver {
   @Field((type) => Int)
   width: number;
 
