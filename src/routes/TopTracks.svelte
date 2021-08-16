@@ -7,7 +7,7 @@
   import { GET_FAKE_TRACKS } from "./queries";
 
   let wrapper: HTMLElement;
-  let maxElementsPerRow = 10;
+  let maxElementsPerRow = 7;
   let origin: {
     x: number;
     y: number;

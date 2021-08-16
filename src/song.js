@@ -24416,6 +24416,6 @@ const fakeSongs = [
     type: "track",
     uri: "spotify:track:25g4eKr6Xy8tXmf66pqLgs",
   },
-].slice(0, 100);
+].slice(0, 49);
 
 export { fakeSongs };
