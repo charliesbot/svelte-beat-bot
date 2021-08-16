@@ -1,14 +1,17 @@
 <script lang="ts">
   import BetterScroll from "@better-scroll/core";
-  import { useQuery } from "@sveltestack/svelte-query";
   import { operationStore, query } from "@urql/svelte";
   import Song from "$lib/components/Song.svelte";
-  import { distanceBetweenPoints, getCenter } from "$lib/utils/layout";
-  import { songs as music } from "../song";
+  import { getCenter } from "$lib/utils/layout";
 
   let wrapper: HTMLElement;
-  let maxElementsPerRow = 14;
+  let maxElementsPerRow = 13;
   let currentSize = 200;
+  let origin: {
+    x: number;
+    y: number;
+  };
+  let scrollPoints: any;
 
   const GET_TOP_TRACKS = operationStore(
     `
@@ -35,14 +38,39 @@
     {
       entity: "tracks",
       timeRange: "long_term",
-      limit: 50,
+      limit: 49,
     }
   );
 
-  const queryResult = query(GET_TOP_TRACKS);
+  const GET_FAKE_TRACKS = operationStore(
+    `
+    query GetTopTracksFake {
+      topTracksFake {
+        id
+        name
+        artists {
+          id
+          name
+        }
+        album {
+          id
+          name
+          images {
+            width
+            height
+            url
+          }
+        }
+      }
+    }
+  `
+  );
+
+  const queryResult = query(GET_FAKE_TRACKS);
 
   $: if (wrapper) {
     const songs: HTMLElement[] = Array.from(wrapper.querySelectorAll(".song"));
+    origin = getCenter(document.body);
 
     let bscroll: BetterScroll = new BetterScroll(wrapper, {
       freeScroll: true,
@@ -56,27 +84,8 @@
       currentSize / 2
     );
 
-    bscroll.on("scroll", () => {
-      const distances = songs.map((song) => {
-        const rect = song.getBoundingClientRect();
-        const coords = {
-          x: rect.left + rect.width / 2,
-          y: rect.top + rect.height / 2,
-        };
-        const origin = getCenter(document.body);
-        const calculatedDistance = distanceBetweenPoints(origin, coords);
-        const delta = 2 - calculatedDistance / (currentSize * 1.65);
-        const limitedDelta = Math.max(delta, 1);
-        const zIndex = Math.ceil(limitedDelta * 100);
-        return { delta: limitedDelta, zIndex };
-      });
-
-      songs.forEach((song, index) => {
-        const { delta, zIndex } = distances[index];
-        song.style.transform = `scale3d(${delta}, ${delta}, ${delta})`;
-        delta > 1.5 ? song.classList.add("show-overlay") : song.classList.remove("show-overlay");
-        song.style.zIndex = zIndex.toString();
-      });
+    bscroll.on("scroll", (coords) => {
+      scrollPoints = coords;
     });
   }
 </script>
@@ -91,12 +100,13 @@
       class="content"
       style="
       --width:{currentSize * maxElementsPerRow}px;
-      --height:{Math.ceil(music.length / maxElementsPerRow) * currentSize};
+      --height:{Math.ceil($queryResult.data.topTracksFake.length / maxElementsPerRow) *
+        currentSize};
       --maxElementsPerRow:{maxElementsPerRow}
       "
     >
-      {#each $queryResult.data.topTracks as song}
-        <Song size={currentSize} {song} />
+      {#each $queryResult.data.topTracksFake as song}
+        <Song size={currentSize} {song} {scrollPoints} {currentSize} {origin} />
       {/each}
     </aside>
   </main>

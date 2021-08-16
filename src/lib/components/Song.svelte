@@ -1,15 +1,47 @@
 <script lang="ts">
   import type { SongType } from "$lib/types";
+  import { distanceBetweenPoints } from "$lib/utils/layout";
 
-  export let node: HTMLDivElement;
+  export let node: HTMLElement;
   export let size: number;
   export let song: SongType;
+  export let currentSize: number;
+  export let scrollPoints: any;
+  export let origin: {
+    x: number;
+    y: number;
+  };
+
+  let delta: number;
+  let zIndex: number;
 
   const { album, previewUrl } = song;
   const coverArt = album.images[1].url;
+
+  $: if (node && scrollPoints) {
+    const rect = node.getBoundingClientRect();
+    const coords = {
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
+    };
+    const calculatedDistance = distanceBetweenPoints(origin, coords);
+    const maybeDelta = 2 - calculatedDistance / (currentSize * 1.65);
+    delta = Math.max(maybeDelta, 1);
+    zIndex = Math.ceil(delta * 100);
+  }
 </script>
 
-<div class="song" style="--size:{size}px; --coverArt:url({coverArt})" bind:this={node}>
+<div
+  class="song"
+  style="
+    --size:{size}px;
+    --coverArt:url({coverArt});
+    --delta: {delta};
+    --zIndex: {zIndex};
+  "
+  class:show-overlay={delta > 1.5}
+  bind:this={node}
+>
   <div class="overlay">
     <section class="info">
       <strong class="songTitle">{song.name}</strong>
@@ -30,7 +62,9 @@
     border-radius: 0.25rem;
     overflow: hidden;
     will-change: transform;
+    transform: scale3d(var(--delta), var(--delta), var(--delta));
     border: none;
+    z-index: var(--zIndex);
     box-shadow: 0px 0px 5px 4px rgba(0, 0, 0, 0.3);
     background-image: var(--coverArt);
     &.show-overlay .overlay {

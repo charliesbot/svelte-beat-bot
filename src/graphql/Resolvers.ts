@@ -1,4 +1,5 @@
 import { Resolver, Query, Args, Arg, ArgsType, InputType, Field, Ctx, Int } from "type-graphql";
+import { fakeSongs } from "../song";
 
 import type { SpotifySDK, Entity, TimeRange } from "$lib/SpotifySDK";
 
@@ -25,6 +26,17 @@ export class Resolvers {
   ) {
     const topTracks = await ctx.client.getTopTracks(entity, timeRange, limit);
     return topTracks.items;
+  }
+
+  @Query(() => [Song])
+  async topTracksFake() {
+    return fakeSongs;
+  }
+
+  @Query(() => [Song])
+  async topTracksFromAllTimeRanges(@Ctx() ctx: Context) {
+    const topTracks = await ctx.client.getTopTracksFromAllTimeRanges();
+    return topTracks;
   }
 
   @Query(() => User)
