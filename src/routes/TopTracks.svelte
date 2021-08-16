@@ -2,24 +2,26 @@
   import BetterScroll from "@better-scroll/core";
   import { useQuery } from "@sveltestack/svelte-query";
   import Song from "$lib/components/Song.svelte";
-  import { getCenter } from "$lib/utils/layout";
+  import { getCenter, isMobile } from "$lib/utils/layout";
   import { graphqlClient } from "./graphqlClient";
   import { GET_FAKE_TRACKS } from "./queries";
 
   let wrapper: HTMLElement;
   let maxElementsPerRow = 13;
-  let currentSize = 200;
   let origin: {
     x: number;
     y: number;
   };
   let scrollPoints: any;
+  let currentSize = 150;
 
   const queryResult = useQuery("repoData", async () => {
     return graphqlClient.request(GET_FAKE_TRACKS);
   });
 
   $: if (wrapper) {
+    currentSize = isMobile() ? 150 : 200;
+    console.log(currentSize);
     const songs: HTMLElement[] = Array.from(wrapper.querySelectorAll(".song"));
     origin = getCenter(document.body);
 
@@ -53,6 +55,7 @@
       --width:{currentSize * maxElementsPerRow}px;
       --height:{Math.ceil($queryResult.data.topTracksFake.length / maxElementsPerRow) *
         currentSize};
+      --size:{currentSize}px;
       --maxElementsPerRow:{maxElementsPerRow}
       "
     >
@@ -76,8 +79,8 @@
 
   aside {
     display: grid;
-    grid-template-columns: repeat(var(--maxElementsPerRow), 200px);
-    grid-template-rows: repeat(mar(--maxElementsPerRow), maxEle 200px);
+    grid-template-columns: repeat(var(--maxElementsPerRow), var(--size));
+    grid-template-rows: repeat(mar(--maxElementsPerRow), var(--size));
     position: relative;
     color: white;
     width: var(--width);
