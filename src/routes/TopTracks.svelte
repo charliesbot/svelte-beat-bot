@@ -2,7 +2,7 @@
   import BetterScroll from "@better-scroll/core";
   import { useQuery } from "@sveltestack/svelte-query";
   import Song from "$lib/components/Song.svelte";
-  import { getCenter, isMobile } from "$lib/utils/layout";
+  import { getCenter, isMobile, distanceBetweenPoints } from "$lib/utils/layout";
   import { graphqlClient } from "./graphqlClient";
   import { GET_FAKE_TRACKS } from "./queries";
 
@@ -21,7 +21,6 @@
 
   $: if (wrapper) {
     currentSize = isMobile() ? 150 : 200;
-    console.log(currentSize);
     const songs: HTMLElement[] = Array.from(wrapper.querySelectorAll(".song"));
     origin = getCenter(document.body);
 
@@ -37,8 +36,31 @@
       currentSize / 2
     );
 
-    bscroll.on("scroll", (coords) => {
-      scrollPoints = coords;
+    bscroll.on("scroll", () => {
+      const distances = songs.map((s) => {
+        const rect = s.getBoundingClientRect();
+        const coords = {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2,
+        };
+
+        const calculatedDistance = distanceBetweenPoints(origin, coords);
+
+        const delta = 2 - calculatedDistance / (currentSize * 1.65);
+
+        const limitedDelta = Math.max(delta, 1);
+
+        const zIndex = Math.ceil(limitedDelta * 100);
+
+        return { delta: limitedDelta, zIndex };
+      });
+
+      songs.forEach((s, index) => {
+        const { delta, zIndex } = distances[index];
+        s.style.transform = `scale3d(${delta}, ${delta}, ${delta})`;
+        delta > 1.5 ? s.classList.add("show-overlay") : s.classList.remove("show-overlay");
+        s.style.zIndex = zIndex.toString();
+      });
     });
   }
 </script>
@@ -60,7 +82,7 @@
       "
     >
       {#each $queryResult.data.topTracksFake as song}
-        <Song size={currentSize} {song} {scrollPoints} {currentSize} {origin} />
+        <Song size={currentSize} {song} />
       {/each}
     </aside>
   </main>

@@ -12,6 +12,10 @@
   --column-margin-top: 4rem;
 }
 
+.song.show-overlay .overlay {
+  opacity: 1 !important;
+}
+
 body {
   height: 100vh;
   max-height: 100vh;
