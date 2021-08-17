@@ -19,6 +19,25 @@
   $: if (wrapper) {
     currentSize = isMobile() ? 150 : 200;
     const songs: HTMLElement[] = Array.from(wrapper.querySelectorAll(".song"));
+    const observer = new IntersectionObserver(
+      (changes, observer) => {
+        changes.forEach((change) => {
+          if (!change.isIntersecting) {
+            change.target.style.visibility = "hidden";
+          } else {
+            change.target.style.visibility = "visible";
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: "0px",
+        threshold: 0.1,
+      }
+    );
+    songs.forEach((el) => {
+      observer.observe(el);
+    });
 
     origin = getCenter(document.body);
 
