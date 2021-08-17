@@ -118,7 +118,7 @@
     bottom: 0;
     left: 0;
     opacity: 0;
-    transition: 300ms ease opacity;
+    transition: 100ms ease opacity;
     background-color: rgba(0, 0, 0, 0.6);
     color: white;
     padding: 0.5rem;
