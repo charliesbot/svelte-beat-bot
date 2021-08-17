@@ -26,6 +26,10 @@ html {
   box-sizing: inherit;
 }
 
+.song.show-overlay .overlay {
+  opacity: 1 !important;
+}
+
 body {
   height: 100vh;
   max-height: 100vh;

@@ -5,7 +5,6 @@
   import { getCenter, isMobile, distanceBetweenPoints } from "$lib/utils/layout";
   import { graphqlClient } from "./graphqlClient";
   import { GET_FAKE_TRACKS } from "./queries";
-
   let wrapper: HTMLElement;
   let maxElementsPerRow = 13;
   let origin: {
@@ -14,11 +13,9 @@
   };
   let scrollPoints: any;
   let currentSize = 150;
-
   const queryResult = useQuery("repoData", async () => {
     return graphqlClient.request(GET_FAKE_TRACKS);
   });
-
   $: if (wrapper) {
     currentSize = isMobile() ? 150 : 200;
     const songs: HTMLElement[] = Array.from(wrapper.querySelectorAll(".song"));
@@ -37,8 +34,26 @@
       currentSize / 2
     );
 
-    bscroll.on("scroll", (points) => {
-      scrollPoints = points;
+    bscroll.on("scroll", () => {
+      const distances = songs.map((s) => {
+        const rect = s.getBoundingClientRect();
+        const coords = {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2,
+        };
+        const calculatedDistance = distanceBetweenPoints(origin, coords);
+        const delta = 2 - calculatedDistance / (currentSize * 1.65);
+        const limitedDelta = Math.max(delta, 1);
+        const zIndex = Math.ceil(limitedDelta * 100);
+        return { delta: limitedDelta, zIndex };
+      });
+
+      songs.forEach((s, index) => {
+        const { delta, zIndex } = distances[index];
+        s.style.transform = `scale3d(${delta}, ${delta}, ${delta})`;
+        delta > 1.5 ? s.classList.add("show-overlay") : s.classList.remove("show-overlay");
+        s.style.zIndex = zIndex.toString();
+      });
     });
   }
 </script>

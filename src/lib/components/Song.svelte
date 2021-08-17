@@ -1,35 +1,13 @@
 <script lang="ts">
   import type { SongType } from "$lib/types";
-  import { distanceBetweenPoints } from "$lib/utils/layout";
   import mediaTracker from "$lib/utils/mediaTracker";
-  import type { Point } from "$lib/utils/layout";
 
   export let node: HTMLElement;
   export let size: number;
   export let song: SongType;
-  export let origin: Point;
-  export let scrollPoints: any;
-  let zIndex: number;
-  let limitedDelta: number;
 
   const { album, previewUrl } = song;
   const coverArt = album.images[1].url;
-
-  $: if (node && origin && scrollPoints) {
-    const rect = node.getBoundingClientRect();
-    const coords = {
-      x: rect.left + rect.width / 2,
-      y: rect.top + rect.height / 2,
-    };
-
-    const calculatedDistance = distanceBetweenPoints(origin, coords);
-
-    const delta = 2 - calculatedDistance / (size * 1.65);
-
-    limitedDelta = Math.max(delta, 1);
-
-    zIndex = Math.ceil(limitedDelta * 100);
-  }
 
   function toggleSong() {
     mediaTracker.playSong(previewUrl);
@@ -40,11 +18,8 @@
   class="song"
   style="
     --size:{size}px;
-    --zIndex:{zIndex};
-    --limitedDelta: {limitedDelta};
     --coverArt:url({coverArt});
   "
-  class:show-overlay={limitedDelta > 1.5}
   bind:this={node}
 >
   <div class="overlay">
@@ -90,8 +65,6 @@
     will-change: transform;
     border: none;
     box-shadow: 0px 0px 5px 4px rgba(0, 0, 0, 0.3);
-    transform: scale3d(var(--limitedDelta), var(--limitedDelta), var(--limitedDelta));
-    z-index: var(--zIndex);
     background-image: var(--coverArt);
     &.show-overlay .overlay {
       opacity: 1;
