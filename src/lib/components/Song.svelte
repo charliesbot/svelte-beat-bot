@@ -1,8 +1,9 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import type { SongType } from "$lib/types";
   import mediaTracker from "$lib/utils/mediaTracker";
 
-  export let node: HTMLElement;
+  let node: HTMLElement;
   export let size: number;
   export let song: SongType;
 
@@ -12,16 +13,15 @@
   function toggleSong() {
     mediaTracker.playSong(previewUrl);
   }
+
+  $: if (node) {
+    node.style.backgroundImage = `url(${coverArt})`;
+    node.style.height = `${size}px`;
+    node.style.width = `${size}px`;
+  }
 </script>
 
-<div
-  class="song"
-  style="
-    --size:{size}px;
-    --coverArt:url({coverArt});
-  "
-  bind:this={node}
->
+<div class="song" bind:this={node}>
   <div class="overlay">
     <section class="info">
       <strong class="songTitle">{song.name}</strong>
@@ -29,7 +29,23 @@
     </section>
     {#if previewUrl !== undefined}
       <section class="actions">
-        <button on:click={toggleSong}> Play </button>
+        <button on:click={toggleSong}>
+          <svg
+            aria-hidden="true"
+            focusable="false"
+            data-prefix="fas"
+            data-icon="play"
+            role="img"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 448 512"
+            class="svg-inline--fa fa-play fa-w-14 fa-2x"
+            ><path
+              fill="currentColor"
+              d="M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z"
+              class="play-icon"
+            /></svg
+          >
+        </button>
       </section>
     {/if}
   </div>
@@ -40,8 +56,6 @@
     display: flex;
     top: 0;
     left: 0;
-    width: var(--size);
-    height: var(--size);
     position: relative;
     background-size: cover;
     border-radius: 0.25rem;
@@ -49,7 +63,6 @@
     will-change: transform;
     border: none;
     box-shadow: 0px 0px 5px 4px rgba(0, 0, 0, 0.3);
-    background-image: var(--coverArt);
     &.show-overlay .overlay {
       opacity: 1;
     }
@@ -104,7 +117,7 @@
     bottom: 0;
     left: 0;
     opacity: 0;
-    transition: 100ms ease opacity;
+    transition: 300ms ease opacity;
     background-color: rgba(0, 0, 0, 0.6);
     color: white;
     padding: 0.5rem;

@@ -11,38 +11,21 @@
     x: number;
     y: number;
   };
-  let scrollPoints: any;
   let currentSize = 150;
+  let prevPoints = undefined;
   const queryResult = useQuery("repoData", async () => {
     return graphqlClient.request(GET_FAKE_TRACKS);
   });
   $: if (wrapper) {
     currentSize = isMobile() ? 150 : 200;
     const songs: HTMLElement[] = Array.from(wrapper.querySelectorAll(".song"));
-    const observer = new IntersectionObserver(
-      (changes, observer) => {
-        changes.forEach((change) => {
-          if (!change.isIntersecting) {
-            change.target.style.visibility = "hidden";
-          } else {
-            change.target.style.visibility = "visible";
-          }
-        });
-      },
-      {
-        root: null,
-        rootMargin: "0px",
-        threshold: 0.1,
-      }
-    );
-    songs.forEach((el) => {
-      observer.observe(el);
-    });
 
     origin = getCenter(document.body);
 
-    let bscroll: BetterScroll = new BetterScroll(wrapper, {
+    const bscroll: BetterScroll = new BetterScroll(wrapper, {
       freeScroll: true,
+      scrollX: true,
+      scrollY: true,
       probeType: 3,
     });
 
@@ -53,7 +36,7 @@
       currentSize / 2
     );
 
-    bscroll.on("scroll", () => {
+    bscroll.on("scroll", (points) => {
       const distances = songs.map((s) => {
         const rect = s.getBoundingClientRect();
         const coords = {
@@ -94,7 +77,7 @@
       "
     >
       {#each $queryResult.data.topTracksFake as song}
-        <Song size={currentSize} {song} {origin} {scrollPoints} />
+        <Song size={currentSize} {song} />
       {/each}
     </aside>
   </main>
