@@ -12,8 +12,18 @@
   --column-margin-top: 4rem;
 }
 
-.song.show-overlay .overlay {
-  opacity: 1 !important;
+html {
+  box-sizing: border-box;
+  height: 100vh;
+  max-height: 100vh;
+  width: 100vw;
+  max-width: 100vw;
+  overflow: hidden;
+}
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
 }
 
 body {
@@ -21,6 +31,7 @@ body {
   max-height: 100vh;
   width: 100vw;
   max-width: 100vw;
+  overflow: hidden;
   margin: 0;
   padding: 0;
   background-color: black;

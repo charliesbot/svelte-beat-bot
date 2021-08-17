@@ -22,26 +22,6 @@
   $: if (wrapper) {
     currentSize = isMobile() ? 150 : 200;
     const songs: HTMLElement[] = Array.from(wrapper.querySelectorAll(".song"));
-    const observer = new IntersectionObserver(
-      (changes, observer) => {
-        changes.forEach((change) => {
-          if (!change.isIntersecting) {
-            change.target.style.visibility = "hidden";
-          } else {
-            change.target.style.visibility = "visible";
-          }
-        });
-      },
-      {
-        root: null,
-        rootMargin: "0px",
-        threshold: 0.1,
-      }
-    );
-
-    songs.forEach((el) => {
-      observer.observe(el);
-    });
 
     origin = getCenter(document.body);
 
@@ -57,31 +37,8 @@
       currentSize / 2
     );
 
-    bscroll.on("scroll", () => {
-      const distances = songs.map((s) => {
-        const rect = s.getBoundingClientRect();
-        const coords = {
-          x: rect.left + rect.width / 2,
-          y: rect.top + rect.height / 2,
-        };
-
-        const calculatedDistance = distanceBetweenPoints(origin, coords);
-
-        const delta = 2 - calculatedDistance / (currentSize * 1.65);
-
-        const limitedDelta = Math.max(delta, 1);
-
-        const zIndex = Math.ceil(limitedDelta * 100);
-
-        return { delta: limitedDelta, zIndex };
-      });
-
-      songs.forEach((s, index) => {
-        const { delta, zIndex } = distances[index];
-        s.style.transform = `scale3d(${delta}, ${delta}, ${delta})`;
-        delta > 1.5 ? s.classList.add("show-overlay") : s.classList.remove("show-overlay");
-        s.style.zIndex = zIndex.toString();
-      });
+    bscroll.on("scroll", (points) => {
+      scrollPoints = points;
     });
   }
 </script>
@@ -103,7 +60,7 @@
       "
     >
       {#each $queryResult.data.topTracksFake as song}
-        <Song size={currentSize} {song} />
+        <Song size={currentSize} {song} {origin} {scrollPoints} />
       {/each}
     </aside>
   </main>

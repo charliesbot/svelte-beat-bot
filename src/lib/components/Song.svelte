@@ -1,20 +1,50 @@
 <script lang="ts">
   import type { SongType } from "$lib/types";
+  import { distanceBetweenPoints } from "$lib/utils/layout";
+  import mediaTracker from "$lib/utils/mediaTracker";
+  import type { Point } from "$lib/utils/layout";
 
   export let node: HTMLElement;
   export let size: number;
   export let song: SongType;
+  export let origin: Point;
+  export let scrollPoints: any;
+  let zIndex: number;
+  let limitedDelta: number;
 
   const { album, previewUrl } = song;
   const coverArt = album.images[1].url;
+
+  $: if (node && origin && scrollPoints) {
+    const rect = node.getBoundingClientRect();
+    const coords = {
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
+    };
+
+    const calculatedDistance = distanceBetweenPoints(origin, coords);
+
+    const delta = 2 - calculatedDistance / (size * 1.65);
+
+    limitedDelta = Math.max(delta, 1);
+
+    zIndex = Math.ceil(limitedDelta * 100);
+  }
+
+  function toggleSong() {
+    mediaTracker.playSong(previewUrl);
+  }
 </script>
 
 <div
   class="song"
   style="
     --size:{size}px;
+    --zIndex:{zIndex};
+    --limitedDelta: {limitedDelta};
     --coverArt:url({coverArt});
   "
+  class:show-overlay={limitedDelta > 1.5}
   bind:this={node}
 >
   <div class="overlay">
@@ -22,6 +52,27 @@
       <strong class="songTitle">{song.name}</strong>
       <span class="songArtist">{song.artists[0].name}</span>
     </section>
+    {#if previewUrl !== undefined}
+      <section class="actions">
+        <button on:click={toggleSong}>
+          <svg
+            aria-hidden="true"
+            focusable="false"
+            data-prefix="fas"
+            data-icon="play"
+            role="img"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 448 512"
+            class="svg-inline--fa fa-play fa-w-14 fa-2x"
+            ><path
+              fill="currentColor"
+              d="M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z"
+              class="play-icon"
+            /></svg
+          >
+        </button>
+      </section>
+    {/if}
   </div>
 </div>
 
@@ -39,10 +90,11 @@
     will-change: transform;
     border: none;
     box-shadow: 0px 0px 5px 4px rgba(0, 0, 0, 0.3);
+    transform: scale3d(var(--limitedDelta), var(--limitedDelta), var(--limitedDelta));
+    z-index: var(--zIndex);
     background-image: var(--coverArt);
     &.show-overlay .overlay {
       opacity: 1;
-      background-color: blue;
     }
   }
 
@@ -52,17 +104,34 @@
     border: none;
     background-color: rgba(255, 255, 255, 0);
     cursor: pointer;
+    height: 50px;
+    width: 50px;
     svg {
+      width: 20px;
+      color: white;
       pointer-events: none;
     }
   }
 
-  section {
+  section.info {
     display: flex;
     flex-direction: column;
     justify-content: center;
     flex: 1;
     max-width: 100%;
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 3rem;
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+    position: absolute;
+    left: 0px;
+    bottom: 0px;
   }
 
   .overlay {
@@ -76,7 +145,7 @@
     bottom: 0;
     left: 0;
     opacity: 0;
-    transition: 100ms ease opacity;
+    transition: 300ms ease opacity;
     background-color: rgba(0, 0, 0, 0.6);
     color: white;
     padding: 0.5rem;
@@ -85,18 +154,5 @@
       margin-top: 0.125rem;
       font-size: 0.5rem;
     }
-  }
-
-  ul {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 3rem;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    position: absolute;
-    left: 0;
-    bottom: 0;
   }
 </style>

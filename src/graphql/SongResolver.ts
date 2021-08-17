@@ -30,8 +30,8 @@ export class SongResolver {
   @Field(() => [ArtistResolver])
   artists?: ArtistType[];
 
-  @Field(() => String)
-  get previewUrl(): string {
+  @Field(() => String, { nullable: true })
+  get previewUrl(): string | null {
     return this.preview_url;
   }
 }

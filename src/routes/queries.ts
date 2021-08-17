@@ -3,6 +3,7 @@ import { graphqlClient } from "./graphqlClient";
 export const GET_TOP_TRACKS = `
     query GetTopTracks($entity: String!, $timeRange: String!, $limit: Int!) {
       topTracks(entity: $entity, timeRange: $timeRange, limit: $limit) {
+        previewUrl
         id
         name
         artists {
@@ -25,6 +26,7 @@ export const GET_TOP_TRACKS = `
 export const GET_FAKE_TRACKS = `
     query GetTopTracksFake {
       topTracksFake {
+        previewUrl
         id
         name
         artists {
